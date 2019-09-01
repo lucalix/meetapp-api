@@ -7,14 +7,16 @@ class UserController {
       name: Yup.string().required(),
       email: Yup.string()
         .email()
-        .required(),
+        .required('Email is required.'),
       password: Yup.string()
         .required()
         .min(6)
     });
 
-    if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation fails' });
+    try {
+      await schema.validate(req.body);
+    } catch (err) {
+      return res.status(400).json({ error: err.errors[0] });
     }
 
     const userExists = await User.findOne({ where: { email: req.body.email } });
